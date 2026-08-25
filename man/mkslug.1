@@ -1,0 +1,165 @@
+.\" man page for mkslug
+.TH MKSLUG 1 "2026-07-26" "mkslug 1.0.0" "User Commands"
+.SH NAME
+mkslug \- slugify and unslugify text, files, and directories
+.SH SYNOPSIS
+.B mkslug
+.RI [ options ]
+.RI [ text " | " file-or-directory ]
+.SH DESCRIPTION
+.B mkslug
+converts text into URL\-, branch\-, and filename\-friendly
+.IR slugs ,
+and can convert slugs back into readable text.  Non\-ASCII input is romanized
+with ICU (for example
+.IR caf\('e "  becomes  " cafe ", " Z\(:urich " becomes " zurich ),"
+so slugs are always safe ASCII.
+.PP
+If no positional argument is given, text is read from standard input.  In text
+mode the resulting slug is printed to standard output and copied to the system
+clipboard (unless disabled).  If the positional argument names an existing file
+or directory (or
+.B \-f
+is given), mkslug operates in file mode instead: it previews or performs a
+rename, preserving file extensions.
+.SH OPTIONS
+.SS Common options
+.TP
+.BR \-h ", " \-\-help
+Show detailed help and exit.
+.TP
+.BR \-v ", " \-\-version
+Show version information and exit.
+.TP
+.BR \-c ", " \-\-config " " \fIfile\fR
+Override the configuration file.  By default
+.I ~/.config/mkslug/default.conf
+and
+.I ~/.mkslug.conf
+are read if present.
+.TP
+.BR \-U ", " \-\-unslug
+Unslug the text/file/directory.  Case is preserved by default in this mode.
+.SS Case-conversion options
+These are mutually exclusive; the first one given wins.
+.TP
+.BR \-x ", " \-\-no\-change
+Do not convert the case.
+.TP
+.BR \-l ", " \-\-lower
+Convert to lowercase (the default in slug mode).
+.TP
+.BR \-u ", " \-\-upper
+Convert to uppercase.
+.TP
+.BR \-t ", " \-\-title
+Convert to title case.
+.SS Text-mode options
+.TP
+.BR \-n ", " \-\-no\-clipboard
+Do not copy the result to the clipboard.  By default the slug is copied.
+.SS File/directory-mode options
+Unless
+.B \-f
+is given, mkslug checks whether the path exists and falls back to text mode if
+it does not.  File extensions are preserved and never slugified.
+.TP
+.BR \-f ", " \-\-force
+Force file/directory mode even if the path does not exist.
+.TP
+.BR \-r ", " \-\-rename
+Rename the entry on disk to its slug.
+.TP
+.BR \-R ", " \-\-recurse
+Recurse into directories.
+.TP
+.BR \-X ", " \-\-exclude " " \fIpat\fR
+Comma\-separated patterns to exclude during recursion.
+.TP
+.BR \-I ", " \-\-include " " \fIpat\fR
+Comma\-separated patterns to include during recursion.
+.TP
+.BR \-d ", " \-\-max\-depth " " \fIn\fR
+Maximum recursion depth (0 means unlimited; the default).
+.PP
+In recursion with rename, files are renamed first and directories are renamed
+from the bottom up, avoiding path\-traversal races.
+.SH PATTERNS
+Patterns for
+.B \-X
+and
+.B \-I
+are comma\-separated.  Each element is either a glob delimited by
+.RB ' @ '
+(for example
+.BR @*.tmp@,@*.exe@ )
+or an extended regular expression delimited by
+.RB ' / '
+(for example
+.BR /^.+\e.(doc|ppt|xls)x?$/ ).
+A regex may carry trailing flags after the closing slash:
+.BR i " (case-insensitive), " m " (multiline), " s " (dot-all), " x
+(extended), for example
+.BR /^readme$/i .
+A comma inside an element may be escaped with a backslash.
+.SH CONFIGURATION
+The configuration file uses simple
+.I key = value
+lines.  Recognized keys:
+.BR separator ,
+.BR case ,
+.BR clipboard ,
+.BR transliterate ,
+and
+.BR collapse .
+Lines starting with
+.RB ' # '
+or
+.RB ' ; '
+are comments.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Runtime error (I/O or encoding failure).
+.TP
+.B 2
+Usage error (bad command line).
+.TP
+.B 3
+A required path did not exist.
+.SH EXAMPLES
+.TP
+.B mkslug "Hello, World!"
+Prints
+.I hello-world
+and copies it to the clipboard.
+.TP
+.B mkslug \-t "my cool post"
+Prints
+.IR My-Cool-Post .
+.TP
+.B mkslug \-U hello-world
+Prints
+.IR "hello world" .
+.TP
+.B mkslug \-r "My R\('esum\('e.PDF"
+Renames the file to
+.IR my-resume.PDF .
+.TP
+.B mkslug \-Rr \-X '@*.git@' ./docs
+Recursively slug\-renames entries under
+.IR ./docs .
+.SH FILES
+.TP
+.I ~/.config/mkslug/default.conf
+.TQ
+.I ~/.mkslug.conf
+Default configuration files.
+.SH SEE ALSO
+.BR iconv (1),
+.BR pcre2 (3)
+.SH AUTHORS
+The mkslug contributors.

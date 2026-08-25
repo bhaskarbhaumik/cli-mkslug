@@ -1,0 +1,18 @@
+/* version.h.in - template for generated version header.
+ *
+ * Consumed by CMake (configure_file) and Autotools (AC_CONFIG_FILES) to produce
+ * include/mkslug/version.h. The hand-written GNU Makefile passes -DMKSLUG_VERSION
+ * on the command line instead, so a fallback is provided below.
+ */
+#ifndef MKSLUG_VERSION_H
+#define MKSLUG_VERSION_H
+
+#ifndef MKSLUG_VERSION
+#define MKSLUG_VERSION "@MKSLUG_VERSION@"
+#endif
+
+#define MKSLUG_VERSION_MAJOR @MKSLUG_VERSION_MAJOR@
+#define MKSLUG_VERSION_MINOR @MKSLUG_VERSION_MINOR@
+#define MKSLUG_VERSION_PATCH @MKSLUG_VERSION_PATCH@
+
+#endif /* MKSLUG_VERSION_H */

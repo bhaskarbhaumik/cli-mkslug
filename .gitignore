@@ -1,0 +1,63 @@
+# Build artifacts
+/build/
+/build-*/
+*.o
+*.obj
+*.lo
+*.a
+*.la
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+/mkslug
+/src/mkslug
+/test/test_slug
+/test/test_pattern
+/test/*.log
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+/Testing/
+compile_commands.json
+
+# Autotools generated files
+# NOTE: the root ./Makefile is the hand-written GNU make build and IS tracked.
+#       Autotools uses out-of-tree builds (mkdir build && cd build && ../configure),
+#       so its generated Makefile lands in build/ and never clobbers the root one.
+/autom4te.cache/
+/aclocal.m4
+/config.h
+/config.h.in
+/config.h.in~
+/config.log
+/config.status
+/configure
+/configure~
+/libtool
+/stamp-h1
+Makefile.in
+.deps/
+.dirstamp
+/m4/libtool.m4
+/m4/lt*.m4
+/m4/ltoptions.m4
+/m4/ltsugar.m4
+/m4/ltversion.m4
+/m4/lt~obsolete.m4
+/build-aux/
+
+# Generated version header
+/include/mkslug/version.h
+
+# Editor / OS
+*.swp
+*~
+.DS_Store
+.vscode/
+.idea/
+.cache/

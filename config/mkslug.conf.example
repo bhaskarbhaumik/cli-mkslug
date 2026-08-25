@@ -1,0 +1,23 @@
+# mkslug configuration file
+#
+# Copy to one of:
+#   ~/.config/mkslug/default.conf
+#   ~/.mkslug.conf
+# or point at it with:  mkslug -c /path/to/this/file
+#
+# Lines beginning with '#' or ';' are comments. Values are case-insensitive.
+
+# Word separator character (single character).
+separator = -
+
+# Default case applied in slug mode: nochange | lower | upper | title
+case = lower
+
+# Copy the slug to the clipboard in text mode: true | false
+clipboard = true
+
+# Romanize non-ASCII text to ASCII using ICU: true | false
+transliterate = true
+
+# Collapse runs of separators into a single one: true | false
+collapse = true
