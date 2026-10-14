@@ -10,7 +10,7 @@ extern "C" {
 
 /* Fallback version if the build system did not inject one. */
 #ifndef MKSLUG_VERSION
-#define MKSLUG_VERSION "1.0.0"
+#define MKSLUG_VERSION "1.1.0"
 #endif
 
 /* Case conversion modes. */
