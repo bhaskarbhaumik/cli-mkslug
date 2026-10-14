@@ -6,6 +6,11 @@
  *
  * The payload always travels via stdin (POSIX) or a UTF-16 memory object
  * (Windows), so user text is never interpolated into a shell command. */
+/* -std=c11 hides POSIX APIs (popen, lstat, ...) on glibc; request them. */
+#if !defined(_WIN32) && !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "mkslug/clipboard.h"
 
 #include <stdio.h>

@@ -5,6 +5,11 @@
  * directory's file children are renamed first, then subdirectories bottom-up
  * (a directory is renamed only after everything beneath it has been handled).
  * File extensions are preserved verbatim and never slugified. */
+/* -std=c11 hides POSIX APIs (popen, lstat, ...) on glibc; request them. */
+#if !defined(_WIN32) && !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "mkslug/fileops.h"
 #include "mkslug/slug.h"
 #include "mkslug/pattern.h"
