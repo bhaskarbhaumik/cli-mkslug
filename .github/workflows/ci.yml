@@ -25,6 +25,11 @@ jobs:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-14, macos-15-intel]
         cc: [gcc, clang]
         buildsys: [make, cmake]
+        exclude:
+          # Homebrew ships no Intel gcc bottle, so it would build GCC from
+          # source (well over 30 minutes). Intel macOS is covered by clang.
+          - os: macos-15-intel
+            cc: gcc
     steps:
       - uses: actions/checkout@v5
 
