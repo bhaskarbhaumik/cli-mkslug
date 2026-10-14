@@ -10,9 +10,9 @@
 AC_PREREQ([2.69])
 AC_INIT([mkslug],
         [m4_esyscmd_s([cat VERSION])],
-        [https://example.org/mkslug/issues],
+        [https://github.com/bhaskarbhaumik/cli-mkslug/issues],
         [mkslug],
-        [https://example.org/mkslug])
+        [https://github.com/bhaskarbhaumik/cli-mkslug])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIRS([m4])

@@ -1,5 +1,10 @@
 # mkslug
 
+[![CI](https://github.com/bhaskarbhaumik/cli-mkslug/actions/workflows/ci.yml/badge.svg)](https://github.com/bhaskarbhaumik/cli-mkslug/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/github/v/tag/bhaskarbhaumik/cli-mkslug?label=version&sort=semver)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![C11](https://img.shields.io/badge/C-11-informational)
+
 A fast, dependency-lean C command-line tool to **slugify** and **unslugify**
 text — perfect for branch names, URLs, and filenames — that also operates on
 files and directories.
@@ -166,10 +171,19 @@ include/mkslug/   public headers
 src/              implementation (slug, pattern, clipboard, fileops, …)
 test/             unit tests + black-box CLI tests
 man/              troff man page
-cmake/ m4/        build-system helpers
-.github/          CI
+config/           example configuration file
+scripts/          developer helper scripts
+.github/          CI, Dependabot, issue and pull request templates
 ```
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md) first, and report security issues as
+described in [SECURITY.md](SECURITY.md). Release notes live in
+[CHANGELOG.md](CHANGELOG.md), and the versioning policy in
+[VERSION.md](VERSION.md). See [AUTHORS.md](AUTHORS.md) for who wrote mkslug.
 
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE) © Bhaskar Bhaumik and the mkslug contributors.

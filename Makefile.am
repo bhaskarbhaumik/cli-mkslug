@@ -41,6 +41,12 @@ EXTRA_DIST = \
     README.md \
     LICENSE \
     VERSION \
+    VERSION.md \
+    CHANGELOG.md \
+    AUTHORS.md \
+    CONTRIBUTING.md \
+    CODE_OF_CONDUCT.md \
+    SECURITY.md \
     CMakeLists.txt \
     Makefile \
     mkslug-features.md \

@@ -1,0 +1,46 @@
+name: Bug report
+description: Something in mkslug does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! Security issues go through
+        [private reporting](https://github.com/bhaskarbhaumik/cli-mkslug/security/advisories/new), not here.
+  - type: input
+    id: version
+    attributes:
+      label: mkslug version
+      description: Output of `mkslug --version`
+      placeholder: mkslug 1.1.0
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: OS, architecture and compiler
+      placeholder: macOS 15 arm64, Apple clang 17 / Ubuntu 24.04 x86_64, gcc 13
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and input
+      description: The exact command you ran, plus any config file contents
+      render: console
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the full output and the exit code (`echo $?`)
+      render: console
+    validations:
+      required: true
