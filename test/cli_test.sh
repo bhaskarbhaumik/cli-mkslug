@@ -25,6 +25,16 @@ check "$("$MKSLUG" -n -U 'hello-world')" "hello world"
 check "$(printf 'Stra\303\237e 1' | "$MKSLUG" -n)" "strasse-1"
 check "$(printf 'read from stdin' | "$MKSLUG" -n)" "read-from-stdin"
 
+# --- config: unslug = true, overridden by --no-unslug ---
+cfgdir="$(mktemp -d)"
+printf 'unslug = true\nclipboard = false\n' > "$cfgdir/unslug.conf"
+check "$("$MKSLUG" -c "$cfgdir/unslug.conf" 'Hello-World')" "Hello World"
+check "$("$MKSLUG" -c "$cfgdir/unslug.conf" --no-unslug 'Hello World')" "hello-world"
+printf 'max-depth = -1\n' > "$cfgdir/bad.conf"
+"$MKSLUG" -n -c "$cfgdir/bad.conf" x >/dev/null 2>&1 && { fail=$((fail+1)); echo "  FAIL: bad max-depth accepted"; }
+total=$((total+1))
+rm -rf "$cfgdir"
+
 # --- version / help exit codes ---
 "$MKSLUG" --version >/dev/null 2>&1 || { fail=$((fail+1)); echo "  FAIL: --version exit"; }
 total=$((total+1))
@@ -84,6 +94,50 @@ if command -v mktemp >/dev/null 2>&1; then
         else
             fail=$((fail+1)); echo "  FAIL: collision should have been refused"
         fi
+
+        # config file supplies defaults for file-mode flags; CLI flags win
+        mkdir -p "$tmp/Cfg Root/Keep Me/.git" "$tmp/Cfg Root/Deep One/Deep Two"
+        : > "$tmp/Cfg Root/.DS_Store"
+        : > "$tmp/Cfg Root/Keep Me/.git/Git File"
+        : > "$tmp/Cfg Root/Deep One/Deep Two/Too Deep.md"
+        : > "$tmp/Cfg Root/Note One.md"
+        : > "$tmp/Cfg Root/Skip Me.txt"
+        printf 'recurse = true\nmax-depth = 1\ninclude = @*.md@\nclipboard = false\n' \
+            > "$tmp/files.conf"
+        out="$("$MKSLUG" -c "$tmp/files.conf" "$tmp/Cfg Root")"
+        total=$((total+1))
+        case "$out" in
+            *"Note One.md -> note-one.md"*) : ;;
+            *) fail=$((fail+1)); printf '  FAIL: config recurse/include: %s\n' "$out" ;;
+        esac
+        total=$((total+1))
+        case "$out" in
+            *Skip*|*Deep*) fail=$((fail+1)); printf '  FAIL: config include/max-depth leaked: %s\n' "$out" ;;
+        esac
+        out="$("$MKSLUG" -c "$tmp/files.conf" --no-recurse -I '' "$tmp/Cfg Root")"
+        check "$out" "$tmp/Cfg Root -> cfg-root"
+
+        # built-in exclude skips .DS_Store and .git; -X '' turns it off
+        out="$("$MKSLUG" -c /dev/null -R "$tmp/Cfg Root")"
+        total=$((total+1))
+        case "$out" in
+            *DS_Store*|*.git*) fail=$((fail+1)); printf '  FAIL: default exclude: %s\n' "$out" ;;
+        esac
+        out="$("$MKSLUG" -c /dev/null -R -X '' "$tmp/Cfg Root")"
+        total=$((total+1))
+        case "$out" in
+            *"Git File"*) : ;;
+            *) fail=$((fail+1)); printf '  FAIL: -X empty should clear excludes: %s\n' "$out" ;;
+        esac
+
+        # rename = true in config; --no-rename only previews
+        printf 'rename = true\n' > "$tmp/rename.conf"
+        "$MKSLUG" -c "$tmp/rename.conf" --no-rename "$tmp/Cfg Root/Skip Me.txt" >/dev/null
+        total=$((total+1))
+        [ -f "$tmp/Cfg Root/Skip Me.txt" ] || { fail=$((fail+1)); echo "  FAIL: --no-rename renamed"; }
+        "$MKSLUG" -c "$tmp/rename.conf" "$tmp/Cfg Root/Skip Me.txt" >/dev/null
+        total=$((total+1))
+        [ -f "$tmp/Cfg Root/skip-me.txt" ] || { fail=$((fail+1)); echo "  FAIL: config rename = true"; }
         rm -rf "$tmp"
     fi
 fi

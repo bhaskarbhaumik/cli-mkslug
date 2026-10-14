@@ -6,7 +6,15 @@
  *   clipboard      = true         true/false/on/off/yes/no/1/0
  *   transliterate  = true         romanize non-ASCII via ICU
  *   collapse       = true         collapse runs of separators
+ *   unslug         = false        unslugify instead of slugify      (-U)
+ *   force          = false        force file/dir mode               (-f)
+ *   rename         = false        rename entries on disk            (-r)
+ *   recurse        = false        recurse into directories          (-R)
+ *   max-depth      = 0            recursion depth, 0 = unlimited    (-d)
+ *   exclude        = @.git@       pattern spec, empty = none        (-X)
+ *   include        =              pattern spec, empty = all         (-I)
  *
+ * Keys may be spelled with '-' or '_' (max-depth / max_depth).
  * Lines beginning with '#' or ';' are comments; blank lines are ignored. */
 #include "mkslug/config.h"
 #include "mkslug/util.h"
@@ -22,6 +30,42 @@ void ms_config_defaults(ms_config_t *cfg)
     cfg->transliterate = 1;
     cfg->default_case = MS_CASE_LOWER;
     cfg->collapse = 1;
+    cfg->unslug = 0;
+    cfg->force = 0;
+    cfg->rename = 0;
+    cfg->recurse = 0;
+    cfg->max_depth = 0;
+    cfg->exclude = ms_xstrdup(MS_DEFAULT_EXCLUDE);
+    cfg->include = NULL;
+}
+
+void ms_config_free(ms_config_t *cfg)
+{
+    free(cfg->exclude);
+    free(cfg->include);
+    cfg->exclude = cfg->include = NULL;
+}
+
+/* Replace an owned string setting. */
+static void set_str(char **slot, const char *v)
+{
+    free(*slot);
+    *slot = ms_xstrdup(v);
+}
+
+/* Compare keys case-insensitively, treating '-' and '_' as equal. */
+static int key_is(const char *key, const char *want)
+{
+    for (; *key && *want; key++, want++) {
+        char a = *key, b = *want;
+        if (a == '_')
+            a = '-';
+        if (a >= 'A' && a <= 'Z')
+            a = (char)(a - 'A' + 'a');
+        if (a != b)
+            return 0;
+    }
+    return *key == '\0' && *want == '\0';
 }
 
 static char *trim(char *s)
@@ -108,6 +152,31 @@ static int parse_stream(FILE *fp, const char *path, ms_config_t *cfg)
         } else if (!ms_strcasecmp_ascii(key, "collapse")) {
             if (parse_bool(val, &cfg->collapse) != 0)
                 goto badbool;
+        } else if (key_is(key, "unslug")) {
+            if (parse_bool(val, &cfg->unslug) != 0)
+                goto badbool;
+        } else if (key_is(key, "force")) {
+            if (parse_bool(val, &cfg->force) != 0)
+                goto badbool;
+        } else if (key_is(key, "rename")) {
+            if (parse_bool(val, &cfg->rename) != 0)
+                goto badbool;
+        } else if (key_is(key, "recurse")) {
+            if (parse_bool(val, &cfg->recurse) != 0)
+                goto badbool;
+        } else if (key_is(key, "max-depth")) {
+            char *end;
+            long n = strtol(val, &end, 10);
+            if (val[0] == '\0' || *end != '\0' || n < 0) {
+                fprintf(stderr, "mkslug: %s:%d: invalid max-depth '%s'\n",
+                        path, lineno, val);
+                return -1;
+            }
+            cfg->max_depth = n;
+        } else if (key_is(key, "exclude")) {
+            set_str(&cfg->exclude, val);
+        } else if (key_is(key, "include")) {
+            set_str(&cfg->include, val);
         } else {
             fprintf(stderr, "mkslug: %s:%d: unknown key '%s'\n", path, lineno,
                     key);

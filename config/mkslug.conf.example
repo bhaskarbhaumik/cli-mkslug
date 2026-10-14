@@ -5,19 +5,62 @@
 #   ~/.mkslug.conf
 # or point at it with:  mkslug -c /path/to/this/file
 #
-# Lines beginning with '#' or ';' are comments. Values are case-insensitive.
+# Lines beginning with '#' or ';' are comments. Keys and values are
+# case-insensitive; keys may use '-' or '_' (max-depth = max_depth).
+# Booleans accept true/false, yes/no, on/off, 1/0.
+#
+# Every value below is the built-in default, so this file changes nothing
+# until you edit it. An option given on the command line always wins.
+
+# ---- slug output -----------------------------------------------------------
 
 # Word separator character (single character).
 separator = -
 
-# Default case applied in slug mode: nochange | lower | upper | title
+# Default case in slug mode: nochange | lower | upper | title
+# (CLI: -x/--no-change, -l/--lower, -u/--upper, -t/--title.)
+# Unslug mode keeps the original case unless a case flag is given.
 case = lower
 
-# Copy the slug to the clipboard in text mode: true | false
-clipboard = true
-
-# Romanize non-ASCII text to ASCII using ICU: true | false
+# Romanize non-ASCII text to ASCII using ICU, e.g. "Zürich" -> "zurich".
 transliterate = true
 
-# Collapse runs of separators into a single one: true | false
+# Collapse runs of separators into a single one.
 collapse = true
+
+# Unslugify instead of slugify (CLI: -U/--unslug, --no-unslug).
+unslug = false
+
+# ---- text mode -------------------------------------------------------------
+
+# Copy the result to the clipboard (CLI: -n/--no-clipboard turns it off).
+clipboard = true
+
+# ---- file / directory mode -------------------------------------------------
+
+# Force file/dir mode even if the path does not exist
+# (CLI: -f/--force, --no-force).
+force = false
+
+# Rename entries on disk; when false, only preview "old -> new"
+# (CLI: -r/--rename, --no-rename).
+rename = false
+
+# Recurse into directories (CLI: -R/--recurse, --no-recurse).
+recurse = false
+
+# Maximum recursion depth; 0 = unlimited (CLI: -d/--max-depth <n>).
+max-depth = 0
+
+# Comma-separated patterns to skip during recursion. Excluded directories are
+# not descended into. Each element is a glob in @...@ or a regex in /.../
+# (optional trailing flags i, m, s, x); escape a literal comma as "\,".
+# Leave empty to exclude nothing. (CLI: -X/--exclude <pat>; replaces this list,
+# so -X '' disables it for one run.)
+exclude = @.DS_Store@, @.git@
+
+# Comma-separated patterns an entry must match to be slugged; empty matches
+# everything. Same syntax as exclude.
+# Example: include = @*.md@, /^.+\.(docx?|pptx?|xlsx?)$/i
+# (CLI: -I/--include <pat>; replaces this list.)
+include =

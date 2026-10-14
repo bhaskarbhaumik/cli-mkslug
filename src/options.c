@@ -11,8 +11,34 @@ void ms_options_init(ms_options_t *o)
     memset(o, 0, sizeof *o);
     o->casemode = MS_CASE_LOWER;
     o->casemode_set = 0;
-    o->max_depth = 0;
+    o->unslug = -1;
+    o->force_file = -1;
+    o->do_rename = -1;
+    o->recurse = -1;
+    o->max_depth = -1;
     o->mode = MS_MODE_AUTO;
+}
+
+void ms_options_apply_config(ms_options_t *o, const ms_config_t *cfg)
+{
+    if (o->unslug < 0)
+        o->unslug = cfg->unslug;
+    if (o->force_file < 0)
+        o->force_file = cfg->force;
+    if (o->do_rename < 0)
+        o->do_rename = cfg->rename;
+    if (o->recurse < 0)
+        o->recurse = cfg->recurse;
+    if (o->max_depth < 0)
+        o->max_depth = cfg->max_depth;
+    if (!o->exclude_pat && cfg->exclude)
+        o->exclude_pat = ms_xstrdup(cfg->exclude);
+    if (!o->include_pat && cfg->include)
+        o->include_pat = ms_xstrdup(cfg->include);
+
+    /* Unslug preserves case by default; slug mode uses the configured case. */
+    if (!o->casemode_set)
+        o->casemode = o->unslug ? MS_CASE_NOCHANGE : cfg->default_case;
 }
 
 void ms_options_free(ms_options_t *o)
@@ -75,6 +101,8 @@ static int parse_long(ms_options_t *o, const char *arg, int *iref, int argc,
         o->show_version = 1;
     else if (!strcmp(name, "unslug"))
         o->unslug = 1;
+    else if (!strcmp(name, "no-unslug"))
+        o->unslug = 0;
     else if (!strcmp(name, "no-change"))
         set_case(o, MS_CASE_NOCHANGE);
     else if (!strcmp(name, "lower"))
@@ -86,11 +114,17 @@ static int parse_long(ms_options_t *o, const char *arg, int *iref, int argc,
     else if (!strcmp(name, "no-clipboard"))
         o->no_clipboard = 1;
     else if (!strcmp(name, "force"))
-        o->force_file = 1, o->mode = MS_MODE_FILE;
+        o->force_file = 1;
+    else if (!strcmp(name, "no-force"))
+        o->force_file = 0;
     else if (!strcmp(name, "rename"))
         o->do_rename = 1;
+    else if (!strcmp(name, "no-rename"))
+        o->do_rename = 0;
     else if (!strcmp(name, "recurse"))
         o->recurse = 1;
+    else if (!strcmp(name, "no-recurse"))
+        o->recurse = 0;
     else if (!strcmp(name, "config")) {
         WANT_VALUE();
         free(o->config_path);
@@ -175,7 +209,7 @@ static int parse_short(ms_options_t *o, const char *arg, int *iref, int argc,
         case 'u': set_case(o, MS_CASE_UPPER); break;
         case 't': set_case(o, MS_CASE_TITLE); break;
         case 'n': o->no_clipboard = 1; break;
-        case 'f': o->force_file = 1; o->mode = MS_MODE_FILE; break;
+        case 'f': o->force_file = 1; break;
         case 'r': o->do_rename = 1; break;
         case 'R': o->recurse = 1; break;
         default:
@@ -226,10 +260,6 @@ int ms_options_parse(int argc, char **argv, ms_options_t *o)
         got_positional = 1;
     }
 
-    /* -U (unslug) defaults to preserving case unless a case flag was given. */
-    if (o->unslug && !o->casemode_set)
-        o->casemode = MS_CASE_NOCHANGE;
-
     return 0;
 }
 
@@ -254,6 +284,7 @@ void ms_print_help(void)
 "  -c, --config <file>     Override config file\n"
 "                          (default: ~/.config/mkslug/default.conf, ~/.mkslug.conf)\n"
 "  -U, --unslug            Unslug text/file/dir (preserves case by default)\n"
+"      --no-unslug         Slugify even if the config sets unslug = true\n"
 "\n"
 "Case-conversion options (mutually exclusive; first one wins):\n"
 "  -x, --no-change         Do not convert the case\n"
@@ -272,11 +303,17 @@ void ms_print_help(void)
 "  -r, --rename            Rename the entry on disk to its slug\n"
 "  -R, --recurse           Recurse into directories\n"
 "  -X, --exclude <pat>     Comma-separated patterns to exclude in recursion\n"
+"                          (default: @.DS_Store@,@.git@; -X '' excludes nothing)\n"
 "  -I, --include <pat>     Comma-separated patterns to include in recursion\n"
 "  -d, --max-depth <n>     Maximum recursion depth (0 = unlimited; default 0)\n"
+"      --no-force, --no-rename, --no-recurse\n"
+"                          Turn off a flag enabled in the config file\n"
 "\n"
 "  In recursion with rename, files are renamed first, then directories from the\n"
 "  bottom up, to avoid path-traversal races.\n"
+"\n"
+"Every option except -h, -v and -c can be given a default in the config file;\n"
+"an option on the command line always wins (-X/-I replace the configured list).\n"
 "\n"
 "Patterns (for -X / -I):\n"
 "  glob     enclosed in '@'   e.g.  @*.tmp@,@*.exe@\n"

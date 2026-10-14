@@ -16,10 +16,25 @@ typedef struct {
     int transliterate;   /* romanize non-ASCII via ICU (1/0), default 1    */
     ms_case_t default_case; /* default case in slug mode, default LOWER    */
     int collapse;        /* collapse repeated separators (1/0), default 1  */
+
+    /* Defaults for command-line flags (a flag given on the command line wins). */
+    int unslug;          /* -U : unslugify instead of slugify, default 0   */
+    int force;           /* -f : force file/dir mode, default 0            */
+    int rename;          /* -r : rename on disk, default 0                 */
+    int recurse;         /* -R : recurse into directories, default 0       */
+    long max_depth;      /* -d : recursion depth limit, 0 = unlimited      */
+    char *exclude;       /* -X : pattern spec (owned), default MS_DEFAULT_EXCLUDE */
+    char *include;       /* -I : pattern spec (owned), default NULL (none) */
 } ms_config_t;
+
+/* Compiled-in exclude spec: never touch macOS metadata or Git internals. */
+#define MS_DEFAULT_EXCLUDE "@.DS_Store@,@.git@"
 
 /* Initialize with compiled-in defaults. */
 void ms_config_defaults(ms_config_t *cfg);
+
+/* Free any owned strings inside the config struct. */
+void ms_config_free(ms_config_t *cfg);
 
 /* Load configuration.
  *

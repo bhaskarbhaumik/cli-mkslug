@@ -42,6 +42,7 @@ Common options:
   -v, --version           Show version information
   -c, --config <file>     Override config file
   -U, --unslug            Unslug (preserves case by default)
+      --no-unslug         Slugify even if the config sets unslug = true
 
 Case conversion (mutually exclusive; first wins):
   -x, --no-change         Do not convert case
@@ -57,8 +58,11 @@ File/directory mode:
   -r, --rename            Rename the entry on disk
   -R, --recurse           Recurse into directories
   -X, --exclude <pat>     Comma-separated patterns to exclude
+                          (default: @.DS_Store@,@.git@; -X '' excludes nothing)
   -I, --include <pat>     Comma-separated patterns to include
   -d, --max-depth <n>     Max recursion depth (0 = unlimited)
+      --no-force, --no-rename, --no-recurse
+                          Turn off a flag enabled in the config file
 
 Patterns:  glob in @...@   (e.g. @*.tmp@,@*.exe@)
            regex in /.../  (e.g. /^.+\.(doc|ppt|xls)x?$/)
@@ -119,14 +123,26 @@ sudo make install
 ## Configuration
 
 Settings load from `~/.config/mkslug/default.conf` and `~/.mkslug.conf`
-(or `-c <file>`). See [`config/mkslug.conf.example`](config/mkslug.conf.example):
+(or `-c <file>`). Every command-line option except `-h`, `-v` and `-c` has a
+config key; a flag given on the command line always wins, and `-X`/`-I` replace
+the configured pattern list (`-X ''` clears it). Flags that a config can turn on
+have `--no-*` counterparts (`--no-unslug`, `--no-force`, `--no-rename`,
+`--no-recurse`). See [`config/mkslug.conf.example`](config/mkslug.conf.example);
+the values below are the built-in defaults:
 
 ```ini
 separator     = -        # word separator
-case          = lower    # nochange | lower | upper | title
-clipboard     = true     # copy slug to clipboard
+case          = lower    # nochange | lower | upper | title   (-x/-l/-u/-t)
 transliterate = true     # romanize non-ASCII via ICU
 collapse      = true     # collapse repeated separators
+unslug        = false    # unslugify instead of slugify        (-U)
+clipboard     = true     # copy slug to clipboard              (-n disables)
+force         = false    # force file/dir mode                 (-f)
+rename        = false    # rename on disk, else preview        (-r)
+recurse       = false    # recurse into directories            (-R)
+max-depth     = 0        # recursion depth, 0 = unlimited      (-d)
+exclude       = @.DS_Store@, @.git@   # patterns to skip      (-X)
+include       =          # patterns to keep; empty = all       (-I)
 ```
 
 ## Examples

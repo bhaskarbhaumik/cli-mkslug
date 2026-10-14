@@ -40,6 +40,10 @@ are read if present.
 .TP
 .BR \-U ", " \-\-unslug
 Unslug the text/file/directory.  Case is preserved by default in this mode.
+.TP
+.B \-\-no\-unslug
+Slugify even if the configuration sets
+.BR "unslug = true" .
 .SS Case-conversion options
 These are mutually exclusive; the first one given wins.
 .TP
@@ -74,13 +78,23 @@ Rename the entry on disk to its slug.
 Recurse into directories.
 .TP
 .BR \-X ", " \-\-exclude " " \fIpat\fR
-Comma\-separated patterns to exclude during recursion.
+Comma\-separated patterns to exclude during recursion.  Excluded directories
+are not descended into.  The default is
+.BR @.DS_Store@,@.git@ ;
+this option replaces it, and
+.B \-X ''
+excludes nothing.
 .TP
 .BR \-I ", " \-\-include " " \fIpat\fR
 Comma\-separated patterns to include during recursion.
 .TP
 .BR \-d ", " \-\-max\-depth " " \fIn\fR
 Maximum recursion depth (0 means unlimited; the default).
+.TP
+.BR \-\-no\-force ", " \-\-no\-rename ", " \-\-no\-recurse
+Turn off
+.BR \-f ", " \-r ", or " \-R
+when the configuration file turns it on.
 .PP
 In recursion with rename, files are renamed first and directories are renamed
 from the bottom up, avoiding path\-traversal races.
@@ -105,18 +119,68 @@ A comma inside an element may be escaped with a backslash.
 .SH CONFIGURATION
 The configuration file uses simple
 .I key = value
-lines.  Recognized keys:
-.BR separator ,
-.BR case ,
-.BR clipboard ,
-.BR transliterate ,
+lines.  Keys and values are case\-insensitive, and
+.RB ' \- '
 and
-.BR collapse .
+.RB ' _ '
+are interchangeable in keys.  Booleans accept
+.BR true / false ,
+.BR yes / no ,
+.BR on / off ,
+and
+.BR 1 / 0 .
 Lines starting with
 .RB ' # '
 or
 .RB ' ; '
-are comments.
+are comments.  An option given on the command line always overrides the
+configuration file.  Recognized keys, with their built\-in defaults:
+.TP
+.B separator = \-
+Word separator (a single character).
+.TP
+.B case = lower
+Case in slug mode:
+.BR nochange ", " lower ", " upper ", or " title .
+.TP
+.B transliterate = true
+Romanize non\-ASCII text using ICU.
+.TP
+.B collapse = true
+Collapse runs of separators into one.
+.TP
+.B unslug = false
+Unslugify instead of slugify
+.RB ( \-U ).
+.TP
+.B clipboard = true
+Copy the text\-mode result to the clipboard
+.RB ( \-n
+disables).
+.TP
+.B force = false
+Force file/directory mode
+.RB ( \-f ).
+.TP
+.B rename = false
+Rename entries on disk instead of previewing
+.RB ( \-r ).
+.TP
+.B recurse = false
+Recurse into directories
+.RB ( \-R ).
+.TP
+.B max\-depth = 0
+Maximum recursion depth, 0 for unlimited
+.RB ( \-d ).
+.TP
+.B exclude = @.DS_Store@, @.git@
+Patterns to exclude during recursion; empty excludes nothing
+.RB ( \-X ).
+.TP
+.B include =
+Patterns to include during recursion; empty includes everything
+.RB ( \-I ).
 .SH EXIT STATUS
 .TP
 .B 0
